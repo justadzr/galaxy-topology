@@ -14,6 +14,9 @@ from utils import load_camels, load_illustris, load_sam
 DS = gdr.preprocessing.DiagramSelector(use=True)
 
 
+snap = 84
+
+
 def calc_summary(point_sets, summary, boxsize=None):
     pairs = []
     for points in point_sets:
@@ -94,6 +97,7 @@ def main():
 
         if "sam" in suite and sim_set == "1P":
             sims = glob.glob(suite + "/CV_*/1P_*")
+    print("yzang27: sims set.")
 
     if len(sims) == 0:
         raise ValueError("No simulations found matching given criteria")
@@ -127,13 +131,16 @@ def main():
         except FileNotFoundError:
             print("Could not find", sim+"/CosmoAstro_params.txt")
             params_all.append([0, 0, 0, 0, 0, 0])
+        
+        print(f"yzang27: parameters loaded: {params_all}")
 
         if "camels-sam" in sim:
             data = load_sam(sim)
         elif "camels" in sim:
             data = load_camels(sim)
         elif "Illustris" in sim or "TNG" in sim:
-            data = load_illustris(sim)
+            data = load_illustris(sim, snap_num=snap)
+        print("yzang27: data loaded.")
 
         boxsize = data["boxsize"]
         alpha_range = [0, boxsize/2]
@@ -286,7 +293,7 @@ def main():
         suite_name = suite.split('/')[-1]
         save_dir = f"topology_summaries/{suite_name}"
         os.makedirs(save_dir, exist_ok=True)
-        save_fname = save_dir + f"/es{'_'+sim_set if sim_set is not None else ''}_all{'_'+save_suffix if save_suffix is not None else ''}.npz"
+        save_fname = save_dir + f"/es{'_'+sim_set if sim_set is not None else ''}_all{'_'+save_suffix if save_suffix is not None else ''}_snap{snap}.npz"
         print(f"Saving data to {save_fname}")
         np.savez(save_fname, params=params, alpha=alpha, alpha_scaled=alpha_scaled,
                 es=es, es_scaled=es_scaled, bc=bc, bc_scaled=bc_scaled,
